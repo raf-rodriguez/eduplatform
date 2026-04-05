@@ -1,0 +1,36 @@
+# Dependencias
+node_modules/
+
+# Environment variables (NUNCA subas esto)
+*.env
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Build output
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Database (SQLite si aplica)
+*.db
+*.sqlite
+
+# Backend compiled
+backend/dist/
+
+# Frontend compiled
+frontend/dist/

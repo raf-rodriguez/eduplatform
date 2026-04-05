@@ -1,0 +1,737 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USUARIOS Y AUTENTICACIÓN
+// ============================================
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  birthDate     DateTime?
+  avatarUrl     String?
+  phone         String?
+  
+  // Campos específicos por rol
+  gradeLevel    Int?
+  schoolId      String?
+  
+  // Estados
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  lastLoginAt   DateTime?
+  
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relaciones
+  roles               UserRole[]
+  refreshTokens       RefreshToken[]
+  studentAssessments  StudentAssessment[]
+  progress            Progress[]
+  xpLogs              XpLog[]
+  userBadges          UserBadge[]
+  userLevels          UserLevel[]
+  notifications       Notification[]
+  parentStudents      ParentStudent[] @relation("StudentParents")
+  parentOf            ParentStudent[] @relation("ParentStudents")
+  gamificationProfile GamificationProfile?
+  
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  permissions Json
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userRoles   UserRole[]
+  
+  @@map("roles")
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String
+  roleId    String
+  schoolId  String?
+  
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, roleId, schoolId])
+  @@map("user_roles")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+model School {
+  id          String   @id @default(uuid())
+  name        String
+  address     String?
+  phone       String?
+  email       String?
+  website     String?
+  
+  settings    Json?
+  
+  planType    String   @default("free")
+  planExpiresAt DateTime?
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("schools")
+}
+
+model ParentStudent {
+  id        String   @id @default(uuid())
+  parentId  String
+  studentId String
+  relation  String
+  
+  createdAt DateTime @default(now())
+
+  parent    User     @relation("ParentStudents", fields: [parentId], references: [id], onDelete: Cascade)
+  student   User     @relation("StudentParents", fields: [studentId], references: [id], onDelete: Cascade)
+  
+  @@unique([parentId, studentId])
+  @@map("parent_students")
+}
+
+// ============================================
+// ESTRUCTURA ACADÉMICA
+// ============================================
+
+model Grade {
+  id          String   @id @default(uuid())
+  name        String
+  level       Int
+  orderIndex  Int
+  description String?
+  
+  hasStemTrack Boolean @default(false)
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subjects    Subject[]
+  
+  @@map("grades")
+}
+
+model Subject {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  description String?
+  
+  gradeId     String
+  grade       Grade    @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  
+  isStem      Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  modules     Module[]
+  
+  @@map("subjects")
+}
+
+model Module {
+  id          String   @id @default(uuid())
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String?
+  orderIndex  Int
+  
+  estimatedHours Int?
+  difficulty  String   @default("beginner")
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  lessons     Lesson[]
+  
+  @@map("modules")
+}
+
+model Lesson {
+  id          String   @id @default(uuid())
+  moduleId    String
+  module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?
+  
+  content     Json?
+  videoUrl    String?
+  videoDuration Int?
+  
+  orderIndex  Int
+  duration    Int?
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  resources   LessonResource[]
+  activities  Activity[]
+  assessments Assessment[]
+  progress    Progress[]
+  
+  @@map("lessons")
+}
+
+model LessonResource {
+  id        String   @id @default(uuid())
+  lessonId  String
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  type      String
+  title     String
+  url       String
+  
+  createdAt DateTime @default(now())
+  
+  @@map("lesson_resources")
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  type        String
+  title       String
+  content     Json
+  
+  orderIndex  Int
+  isRequired  Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("activities")
+}
+
+// ============================================
+// EVALUACIONES
+// ============================================
+
+model Assessment {
+  id          String   @id @default(uuid())
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  type        String
+  title       String
+  description String?
+  
+  maxScore    Int      @default(100)
+  passingScore Int     @default(70)
+  timeLimit   Int?
+  maxAttempts Int      @default(3)
+  
+  requiresPrevious Boolean @default(true)
+  
+  isActive    Boolean  @default(true)
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quizzes     Quiz[]
+  studentAssessments StudentAssessment[]
+  
+  @@map("assessments")
+}
+
+model Quiz {
+  id            String     @id @default(uuid())
+  assessmentId  String
+  assessment    Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  title         String
+  description   String?
+  
+  timeLimit     Int?
+  maxAttempts   Int        @default(1)
+  
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  questions     QuizQuestion[]
+  
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id          String   @id @default(uuid())
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  
+  type        String
+  question    String
+  
+  options     Json?
+  correctAnswer String?
+  explanation String?
+  
+  points      Int      @default(10)
+  orderIndex  Int
+  
+  aiGradable  Boolean  @default(false)
+  rubric      Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  studentAnswers StudentAnswer[]
+  
+  @@map("quiz_questions")
+}
+
+model StudentAssessment {
+  id            String     @id @default(uuid())
+  studentId     String
+  student       User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  assessmentId  String
+  assessment    Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  
+  attemptNumber Int
+  
+  score         Float?
+  status        String     @default("in_progress")
+  
+  startedAt     DateTime   @default(now())
+  completedAt   DateTime?
+  
+  createdAt     DateTime   @default(now())
+
+  answers       StudentAnswer[]
+  
+  @@unique([studentId, assessmentId, attemptNumber])
+  @@map("student_assessments")
+}
+
+model StudentAnswer {
+  id              String            @id @default(uuid())
+  attemptId       String
+  attempt         StudentAssessment @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  
+  questionId      String
+  question        QuizQuestion      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  answer          String
+  isCorrect       Boolean?
+  points          Float?
+  
+  aiFeedback      String?
+  aiConfidence    Float?
+  
+  teacherFeedback String?
+  teacherId       String?
+  
+  createdAt       DateTime          @default(now())
+
+  @@map("student_answers")
+}
+
+// ============================================
+// PROGRESO Y SEGUIMIENTO
+// ============================================
+
+model Progress {
+  id          String   @id @default(uuid())
+  studentId   String
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  lessonId    String
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  status      String   @default("not_started")
+  
+  score       Float?
+  timeSpent   Int      @default(0)
+  attempts    Int      @default(0)
+  
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([studentId, lessonId])
+  @@map("progress")
+}
+
+model Skill {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  subjectId   String?
+  
+  parentId    String?
+  level       Int      @default(1)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  mastery     SkillMastery[]
+  
+  @@map("skills")
+}
+
+model SkillMastery {
+  id          String   @id @default(uuid())
+  studentId   String
+  skillId     String
+  skill       Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  
+  masteryLevel Float   @default(0)
+  
+  attempts    Int      @default(0)
+  successes   Int      @default(0)
+  
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  @@unique([studentId, skillId])
+  @@map("skill_mastery")
+}
+
+// ============================================
+// GAMIFICACIÓN
+// ============================================
+
+model GamificationProfile {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  level         Int      @default(1)
+  totalXp       Int      @default(0)
+  
+  currentStreak Int      @default(0)
+  longestStreak Int      @default(0)
+  lastActivityAt DateTime?
+  
+  avatarConfig  Json?
+  theme         String   @default("default")
+  stats         Json?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("gamification_profiles")
+}
+
+model Badge {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  iconUrl     String
+  
+  criteria    Json
+  xpValue     Int      @default(50)
+  
+  rarity      String   @default("common")
+  
+  requiredBadgeId String?
+  gradeLevel  Int?
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  userBadges  UserBadge[]
+  
+  @@map("badges")
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  userId    String
+  badgeId   String
+  badge     Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  
+  earnedAt  DateTime @default(now())
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model Level {
+  id          String   @id @default(uuid())
+  name        String
+  minXp       Int
+  maxXp       Int
+  
+  benefits    Json?
+  
+  iconUrl     String?
+  createdAt   DateTime @default(now())
+
+  userLevels  UserLevel[]
+  
+  @@map("levels")
+}
+
+model UserLevel {
+  id        String   @id @default(uuid())
+  userId    String
+  levelId   String
+  level     Level    @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  
+  earnedAt  DateTime @default(now())
+
+  @@unique([userId, levelId])
+  @@map("user_levels")
+}
+
+model XpLog {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount      Int
+  source      String
+  description String?
+  
+  referenceId String?
+  referenceType String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("xp_log")
+}
+
+// ============================================
+// AGENTES IA
+// ============================================
+
+model AgentTask {
+  id          String   @id @default(uuid())
+  agentType   String
+  
+  inputData   Json
+  
+  status      String   @default("pending")
+  priority    Int      @default(5)
+  
+  result      Json?
+  error       String?
+  
+  createdBy   String?
+  completedBy String?
+  
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+
+  outputs     AgentOutput[]
+  
+  @@map("agent_tasks")
+}
+
+model AgentOutput {
+  id          String   @id @default(uuid())
+  taskId      String
+  task        AgentTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  
+  outputType  String
+  content     Json
+  
+  metadata    Json?
+  
+  isUsed      Boolean  @default(false)
+  usedAt      DateTime?
+  usedBy      String?
+  
+  createdAt   DateTime @default(now())
+
+  @@map("agent_outputs")
+}
+
+model ContentRecommendation {
+  id          String   @id @default(uuid())
+  studentId   String
+  
+  lessonId    String?
+  activityId  String?
+  
+  reason      String
+  reasonData  Json?
+  
+  priority    Int      @default(5)
+  
+  isViewed    Boolean  @default(false)
+  isCompleted Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+
+  @@map("content_recommendations")
+}
+
+// ============================================
+// NOTIFICACIONES
+// ============================================
+
+model Notification {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        String
+  title       String
+  message     String
+  
+  data        Json?
+  
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  
+  actionUrl   String?
+  actionText  String?
+  
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+model NotificationSetting {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  
+  emailEnabled    Boolean  @default(true)
+  pushEnabled     Boolean  @default(true)
+  inAppEnabled    Boolean  @default(true)
+  
+  emailFrequency  String   @default("immediate")
+  
+  assessmentReminders Boolean @default(true)
+  gradeNotifications  Boolean @default(true)
+  progressUpdates     Boolean @default(true)
+  gamificationUpdates Boolean @default(true)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+// ============================================
+// SUSCRIPCIONES Y PAGOS
+// ============================================
+
+model Subscription {
+  id          String   @id @default(uuid())
+  userId      String
+  
+  planType    String
+  planName    String
+  
+  price       Decimal  @db.Decimal(10, 2)
+  currency    String   @default("USD")
+  billingCycle String  @default("monthly")
+  
+  status      String   @default("active")
+  
+  startedAt   DateTime @default(now())
+  expiresAt   DateTime
+  cancelledAt DateTime?
+  
+  paymentMethod String?
+  lastPaymentAt DateTime?
+  
+  stripeSubscriptionId String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  subscriptionId String
+  
+  amount      Decimal  @db.Decimal(10, 2)
+  currency    String   @default("USD")
+  
+  status      String   @default("pending")
+  
+  method      String
+  externalId  String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+
+  @@map("payments")
+}
+
+// ============================================
+// AUDITORÍA
+// ============================================
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  
+  action      String
+  entityType  String
+  entityId    String?
+  
+  oldValue    Json?
+  newValue    Json?
+  
+  ipAddress   String?
+  userAgent   String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_log")
+}
