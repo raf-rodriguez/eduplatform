@@ -2,71 +2,134 @@ EduPlatform — Plataforma Educativa K-12
 Plataforma educativa completa para escuelas K-12 con paneles de administración, maestro y estudiante, sistema de gamificación, asistente IA, y gestión académica integral.
 
 🚀 Características
+
 👑 Panel de Administración
-Gestión de usuarios: Crear, editar, desactivar estudiantes y maestros.
-Asignación académica: Asignar maestros a materias y grados específicos.
-Estructura académica: Creación y gestión de grados y materias.
-Roles y permisos: Control de acceso granular (Super Admin, Admin, Maestro, Estudiante, Padre).
-Auditoría: Registro completo de actividades del sistema con capacidad de eliminación de logs.
-Dashboard analítico: Métricas en tiempo real de usuarios, contenido y actividad.
-Exportación de datos: Descarga de listados a CSV.
+
+  1.Gestión de usuarios: Crear, editar, desactivar estudiantes y maestros.
+  
+  2.Asignación académica: Asignar maestros a materias y grados específicos.
+  
+  3.Estructura académica: Creación y gestión de grados y materias.
+  
+  4.Roles y permisos: Control de acceso granular (Super Admin, Admin, Maestro, Estudiante, Padre).
+  
+  5.Auditoría: Registro completo de actividades del sistema con capacidad de eliminación de logs.
+
+  6.Dashboard analítico: Métricas en tiempo real de usuarios, contenido y actividad.
+  
+  7.Exportación de datos: Descarga de listados a CSV.
+  
 👩‍🏫 Panel del Maestro
-Mi Materia: Página central para subir y gestionar contenido (presentaciones, exámenes, quizzes, prácticas, documentos).
-Asistente IA: Generador de contenido inteligente (exámenes, quizzes, planes de lección, rúbricas, guías de estudio) y chat libre.
-Lista de Estudiantes: Vista filtrada de los estudiantes asignados a sus materias/grados.
-Evaluaciones: Creación y gestión de evaluaciones, plantillas y banco de preguntas.
-Seguimiento: Monitoreo de progreso estudiantil y retroalimentación.
-Comunicación: Foro de discusión y mensajería interna.
-Herramientas: Calendario, control de asistencia y gestión de insignias (badges).
+
+  1.Mi Materia: Página central para subir y gestionar contenido (presentaciones, exámenes, quizzes, prácticas, documentos).
+  
+  2.Asistente IA: Generador de contenido inteligente (exámenes, quizzes, planes de lección, rúbricas, guías de estudio) y chat libre.
+
+  3.Lista de Estudiantes: Vista filtrada de los estudiantes asignados a sus materias/grados.
+
+  4.Evaluaciones: Creación y gestión de evaluaciones, plantillas y banco de preguntas.
+
+  5.Seguimiento: Monitoreo de progreso estudiantil y retroalimentación.
+
+  6.Comunicación: Foro de discusión y mensajería interna.
+
+  7.Herramientas: Calendario, control de asistencia y gestión de insignias (badges).
+  
 🎓 Panel del Estudiante
-Contenido: Acceso a lecciones, videos y recursos asignados.
-Evaluaciones: Realización de quizzes y exámenes con retroalimentación inmediata.
-Gamificación: Sistema de experiencia (XP), niveles, medallas, rachas y tablas de clasificación.
-Progreso: Seguimiento visual de avance por materia y lección.
-Herramientas de estudio: Notas personales, desafíos diarios, calendario y foro.
-Perfil personalizado: Gestión de datos personales y preferencias.
+
+  1.Contenido: Acceso a lecciones, videos y recursos asignados.
+
+  2.Evaluaciones: Realización de quizzes y exámenes con retroalimentación inmediata.
+  
+  3.Gamificación: Sistema de experiencia (XP), niveles, medallas, rachas y tablas de clasificación.
+
+  4.Progreso: Seguimiento visual de avance por materia y lección.
+
+  5.Herramientas de estudio: Notas personales, desafíos diarios, calendario y foro.
+
+  6.Perfil personalizado: Gestión de datos personales y preferencias.
+  
 🛡️ Seguridad
-Autenticación JWT con refresh tokens.
-Autorización basada en roles (RBAC).
-Encriptación de contraseñas con bcrypt (12 rounds).
-Protección contra XSS con DOMPurify + marked.
-Rate limiting y protección contra fuerza bruta.
-Headers de seguridad con Helmet.js.
-CORS configurado y restringido.
+
+  1.Autenticación JWT con refresh tokens.
+
+  2.Autorización basada en roles (RBAC).
+
+  3.Encriptación de contraseñas con bcrypt (12 rounds).
+
+  4.Protección contra XSS con DOMPurify + marked.
+
+  5.Rate limiting y protección contra fuerza bruta.
+
+  6.Headers de seguridad con Helmet.js.
+
+  7.CORS configurado y restringido.
+  
 🛠️ Stack Tecnológico
+
 Frontend
-Tecnología	Versión	Descripción
-React	18.3	UI Library
-TypeScript	5.9	Type safety
-Vite	6.4	Build tool
-Tailwind CSS	3	Styling
-Radix UI	-	Componentes accesibles (headless)
-Zustand	5	State management
-React Query	-	Data fetching y caching
-Axios	-	HTTP client
+
+    Tecnología	Versión	Descripción
+    
+    React	18.3	UI Library
+
+    TypeScript	5.9	Type safety
+
+    Vite	6.4	Build tool
+
+    Tailwind CSS	3	Styling
+
+    Radix UI	-	Componentes accesibles (headless)
+
+    Zustand	5	State management
+
+    React Query	-	Data fetching y caching
+
+    Axios	-	HTTP client
+
 Backend
-Tecnología	Versión	Descripción
-Node.js	20+	Runtime
-Express	4.21	Framework
-TypeScript	5.9	Type safety
-Prisma	5.22	ORM
-PostgreSQL	16+	Base de datos relacional
-JSON Web Token	9.0	Autenticación stateless
-bcrypt	5.1	Encriptación de contraseñas
-OpenAI	4.76	Integración con asistente IA
-Winston	3.17	Logging estructurado
-Zod	3.24	Validación de datos
+
+    Tecnología	Versión	Descripción
+
+    Node.js	20+	Runtime
+
+    Express	4.21	Framework
+
+    TypeScript	5.9	Type safety
+
+    Prisma	5.22	ORM
+
+    PostgreSQL	16+	Base de datos relacional
+
+    JSON Web Token	9.0	Autenticación stateless
+
+    bcrypt	5.1	Encriptación de contraseñas
+
+    OpenAI	4.76	Integración con asistente IA
+
+    Winston	3.17	Logging estructurado
+
+    Zod	3.24	Validación de datos
+
 Express Validator	7.2	Validación de requests
+
 📋 Requisitos Previos
-Node.js >= 20.0.0
-npm >= 9.0.0
-PostgreSQL >= 15
+
+    Node.js >= 20.0.0
+
+    npm >= 9.0.0
+
+    PostgreSQL >= 15
+    
 ⚙️ Instalación
-1. Clonar el repositorio
-git clone https://github.com/raf-rodriguez/eduplatform.git
-cd eduplatform
-2. Configurar variables de entorno
-Backend — Crea el archivo backend/.env:
+  
+   1. Clonar el repositorio
+
+   git clone https://github.com/raf-rodriguez/eduplatform.git
+   cd eduplatform
+
+
+   2. Configurar variables de entornoBackend — Crea el archivo backend/.env:
 
 # Entorno
 NODE_ENV=development
